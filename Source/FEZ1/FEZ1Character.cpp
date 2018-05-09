@@ -66,6 +66,9 @@ void AFEZ1Character::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("CameraLeft", IE_Pressed, this, &AFEZ1Character::CameraLeft);
 	PlayerInputComponent->BindAction("CameraLeft", IE_Released, this, &AFEZ1Character::CameraLeftStop);
 
+	PlayerInputComponent->BindAction("Fall", IE_Pressed, this, &AFEZ1Character::Fall);
+	PlayerInputComponent->BindAction("Fall", IE_Released, this, &AFEZ1Character::FallStop);
+
 }
 
 void AFEZ1Character::CameraRight()
@@ -73,11 +76,14 @@ void AFEZ1Character::CameraRight()
 	if (bCanCameraRotate) {
 		FRotator NewRotator = CameraBoom->RelativeRotation;
 		NewRotator.Yaw = NewRotator.Yaw + -90.f;
-		CameraBoom->RelativeRotation = NewRotator;
+		//CameraBoom->RelativeRotation = NewRotator;
+
+		CameraBoom->SetRelativeRotation(NewRotator, true);
+		//CameraBoom->SetRelativeRotation(FMath::Lerp(CameraBoom->RelativeRotation, NewRotator, 0.05f));
 		
+
+
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRight"));
-		FVector forward = CameraBoom->GetForwardVector();
-		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, forward.ToString());
 		MoveRight(1.f);
 	}
 	bCanCameraRotate = false;
@@ -88,7 +94,8 @@ void AFEZ1Character::CameraLeft()
 	if (bCanCameraRotate) {
 		FRotator NewRotator = CameraBoom->RelativeRotation;
 		NewRotator.Yaw = NewRotator.Yaw + 90.f;
-		CameraBoom->RelativeRotation = NewRotator;
+		//CameraBoom->RelativeRotation = NewRotator;
+		CameraBoom->SetRelativeRotation(NewRotator, true);
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeft"));
 		MoveRight(1.f);
 	}
@@ -108,10 +115,21 @@ void AFEZ1Character::CameraLeftStop()
 }
 
 
+void AFEZ1Character::Fall()
+{
+	if (bCanFall) {
+		FVector ActorLocation = GetActorLocation();
+		ActorLocation.Z -= 10.f;
+		SetActorLocation(ActorLocation);
+	}
+	bCanFall = false;
+}
 
-
-
-
+void AFEZ1Character::FallStop()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("Fall"));
+	bCanFall = true;
+}
 
 
 

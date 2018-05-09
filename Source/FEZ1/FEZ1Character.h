@@ -36,6 +36,12 @@ protected:
 
 	void CameraLeftStop();
 
+	bool bCanFall = true;
+
+	void Fall();
+
+	void FallStop();
+
 
 	/** Handle touch inputs. */
 	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
