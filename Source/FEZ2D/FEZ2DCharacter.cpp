@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "Camera/CameraComponent.h"
+#include "Engine.h"
 
 DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
@@ -28,12 +29,16 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 
 	// Create a camera boom attached to the root (capsule)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->TargetArmLength = 500.0f;
 	CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 75.0f);
 	CameraBoom->bAbsoluteRotation = true;
 	CameraBoom->bDoCollisionTest = false;
 	CameraBoom->RelativeRotation = FRotator(0.0f, -90.0f, 0.0f);
+
+	RootComponent->bEditableWhenInherited = true;
+	GetCapsuleComponent()->bEditableWhenInherited = true;
+	CameraBoom->bEditableWhenInherited = true;
 	
 
 	// Create an orthographic camera (no perspective) and attach it to the boom
@@ -86,7 +91,6 @@ void AFEZ2DCharacter::UpdateAnimation()
 
 	UPaperFlipbook* DesiredAnimation = IdleAnimation;
 
-
 	if (PlayerVelocity.Z > 0 || PlayerVelocity.Z < 0) {
 		DesiredAnimation = JumpAnimation;
 	}
@@ -126,6 +130,18 @@ void AFEZ2DCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AFEZ2DCharacter::TouchStarted);
 	PlayerInputComponent->BindTouch(IE_Released, this, &AFEZ2DCharacter::TouchStopped);
+
+
+
+	PlayerInputComponent->BindAction("CameraRight", IE_Pressed, this, &AFEZ2DCharacter::CameraRight);
+	PlayerInputComponent->BindAction("CameraRight", IE_Released, this, &AFEZ2DCharacter::CameraRightStop);
+
+	PlayerInputComponent->BindAction("CameraLeft", IE_Pressed, this, &AFEZ2DCharacter::CameraLeft);
+	PlayerInputComponent->BindAction("CameraLeft", IE_Released, this, &AFEZ2DCharacter::CameraLeftStop);
+
+	PlayerInputComponent->BindAction("Fall", IE_Pressed, this, &AFEZ2DCharacter::Fall);
+	PlayerInputComponent->BindAction("Fall", IE_Released, this, &AFEZ2DCharacter::FallStop);
+
 }
 
 void AFEZ2DCharacter::MoveRight(float Value)
@@ -133,7 +149,12 @@ void AFEZ2DCharacter::MoveRight(float Value)
 	/*UpdateChar();*/
 
 	// Apply the input to the character motion
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+	FVector vec = CameraBoom->GetForwardVector();
+	//AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+	vec.RotateAngleAxis(90.f, FVector(0, 0, 1));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, vec.ToString());
+	
+	AddMovementInput(FVector(vec.Y * -1, 0, 0), Value);
 }
 
 void AFEZ2DCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
@@ -168,4 +189,73 @@ void AFEZ2DCharacter::UpdateCharacter()
 			Controller->SetControlRotation(FRotator(0.0f, 0.0f, 0.0f));
 		}
 	}
+}
+
+
+void AFEZ2DCharacter::CameraRight()
+{
+	if (bCanCameraRotate) {
+		FRotator NewCapsuleRotation = GetCapsuleComponent()->RelativeRotation;
+		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + -90.f;
+		GetCapsuleComponent()->SetRelativeRotation(NewCapsuleRotation, true);
+		
+		
+		FRotator NewCameraRotation = CameraBoom->RelativeRotation;
+		NewCameraRotation.Yaw = NewCameraRotation.Yaw + -90.f;
+		CameraBoom->RelativeRotation = NewCameraRotation;
+
+		//CameraBoom->SetRelativeRotation(NewRotator, true);
+		//CameraBoom->SetRelativeRotation(FMath::Lerp(CameraBoom->RelativeRotation, NewRotator, 0.05f));
+
+
+
+		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRight"));
+		MoveRight(1.f);
+	}
+	bCanCameraRotate = false;
+}
+
+void AFEZ2DCharacter::CameraLeft()
+{
+	if (bCanCameraRotate) {
+		FRotator NewCapsuleRotation = GetCapsuleComponent()->RelativeRotation;
+		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + +90.f;
+		GetCapsuleComponent()->SetRelativeRotation(NewCapsuleRotation, true);
+
+
+		FRotator NewCameraRotation = CameraBoom->RelativeRotation;
+		NewCameraRotation.Yaw = NewCameraRotation.Yaw + +90.f;
+		CameraBoom->RelativeRotation = NewCameraRotation;
+		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeft"));
+		MoveRight(1.f);
+	}
+	bCanCameraRotate = false;
+}
+
+void AFEZ2DCharacter::CameraRightStop()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRightStop"));
+	bCanCameraRotate = true;
+}
+
+void AFEZ2DCharacter::CameraLeftStop()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeftStop"));
+	bCanCameraRotate = true;
+}
+
+void AFEZ2DCharacter::Fall()
+{
+	if (bCanFall) {
+		FVector ActorLocation = GetActorLocation();
+		ActorLocation.Z -= 10.f;
+		SetActorLocation(ActorLocation);
+	}
+	bCanFall = false;
+}
+
+void AFEZ2DCharacter::FallStop()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("Fall"));
+	bCanFall = true;
 }

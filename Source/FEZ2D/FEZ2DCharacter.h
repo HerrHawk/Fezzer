@@ -58,6 +58,29 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+
+
+
+	bool bCanCameraRotate = true;
+
+	void CameraRight();
+
+	void CameraLeft();
+
+	void CameraRightStop();
+
+	void CameraLeftStop();
+
+	bool bCanFall = true;
+
+	void Fall();
+
+	void FallStop();
+
+
+
+
+
 	void UpdateCharacter();
 
 	/** Handle touch inputs. */
