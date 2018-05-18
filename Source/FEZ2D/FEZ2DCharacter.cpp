@@ -84,8 +84,22 @@ void AFEZ2DCharacter::UpdateAnimation()
 	const FVector PlayerVelocity = GetVelocity();
 	const float PlayerSpeedSqr = PlayerVelocity.SizeSquared();
 
+	UPaperFlipbook* DesiredAnimation = IdleAnimation;
+
+
+	if (PlayerVelocity.Z > 0 || PlayerVelocity.Z < 0) {
+		DesiredAnimation = JumpAnimation;
+	}
+	else if (PlayerVelocity.X > 0 || PlayerVelocity.X < 0) {
+		DesiredAnimation = RunningAnimation;
+	}
+	else {
+		DesiredAnimation = IdleAnimation;
+	}
+
+
+
 	// Are we moving or standing still?
-	UPaperFlipbook* DesiredAnimation = (PlayerSpeedSqr > 0.0f) ? RunningAnimation : IdleAnimation;
 	if( GetSprite()->GetFlipbook() != DesiredAnimation 	)
 	{
 		GetSprite()->SetFlipbook(DesiredAnimation);
