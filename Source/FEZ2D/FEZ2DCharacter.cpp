@@ -32,7 +32,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetCapsuleComponent());
 	CameraBoom->TargetArmLength = 0.0f;
-	CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 75.0f);
+	CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 0.0f);
 	CameraBoom->bAbsoluteRotation = true;
 	CameraBoom->bDoCollisionTest = false;
 	//CameraBoom->RelativeRotation = FRotator(0.0f, -90.0f, 0.0f);
@@ -57,7 +57,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 
 
 	CameraBoom->bUsePawnControlRotation = true;
-	SideViewCameraComponent->SetRelativeLocationAndRotation(FVector(0.f, 500.f, 0.f), FRotator(0.f, -90.f, 0.f));
+	SideViewCameraComponent->SetRelativeLocationAndRotation(FVector(0.f, 5000.f, 0.f), FRotator(0.f, -90.f, 0.f));
 
 
 	// Configure character movement
@@ -315,7 +315,7 @@ void AFEZ2DCharacter::DepthCorrection()
 
 	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-100);
 	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
-	FVector End = ((FrwdVec *1000.0f) + Start);
+	FVector End = ((FrwdVec *5000.0f) + Start);
 	
 	FCollisionQueryParams CollisionParams;
 
