@@ -10,6 +10,7 @@
 #include "GameFramework/Controller.h"
 #include "Camera/CameraComponent.h"
 #include "Engine.h"
+#include "DrawDebugHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(SideScrollerCharacter, Log, All);
 
@@ -69,6 +70,10 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	// Note: This can cause a little floating when going up inclines; you can choose the tradeoff between better
 	// behavior on the edge of a ledge versus inclines by setting this to true or false
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
+
+
+	//LineTrace for DepthCorrection;
+
 
     // 	TextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("IncarGear"));
     // 	TextComponent->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
@@ -189,6 +194,8 @@ void AFEZ2DCharacter::UpdateCharacter()
 			Controller->SetControlRotation(FRotator(0.0f, 0.0f, 0.0f));
 		}
 	}
+
+	DepthCorrection();
 }
 
 
@@ -258,4 +265,31 @@ void AFEZ2DCharacter::FallStop()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("Fall"));
 	bCanFall = true;
+}
+
+
+void AFEZ2DCharacter::DepthCorrection()
+{
+	FHitResult OutHit;
+
+	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-100);
+	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
+	FVector End = ((FrwdVec *600.0f) + Start);
+	
+	FCollisionQueryParams CollisionParams;
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
+
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
+	{
+		if (OutHit.bBlockingHit)
+		{
+			if (GEngine) {
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.GetActor()->GetActorLocation().ToCompactString()));
+			}
+		}
+	}
+
+
+
 }

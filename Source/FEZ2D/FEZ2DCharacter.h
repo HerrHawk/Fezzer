@@ -29,6 +29,7 @@ class AFEZ2DCharacter : public APaperCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
 
+
 	UTextRenderComponent* TextComponent;
 	virtual void Tick(float DeltaSeconds) override;
 protected:
@@ -58,6 +59,8 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
+	
+
 
 
 
@@ -76,6 +79,9 @@ protected:
 	void Fall();
 
 	void FallStop();
+
+	void DepthCorrection();
+
 
 
 
