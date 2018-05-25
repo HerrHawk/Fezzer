@@ -77,7 +77,7 @@ protected:
 
 	void FallStop();
 
-
+	
 
 
 
@@ -100,4 +100,5 @@ public:
 	FORCEINLINE class UCameraComponent* GetSideViewCameraComponent() const { return SideViewCameraComponent; }
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	
 };
