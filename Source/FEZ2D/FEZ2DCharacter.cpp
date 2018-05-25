@@ -274,7 +274,7 @@ void AFEZ2DCharacter::DepthCorrection()
 
 	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-100);
 	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
-	FVector End = ((FrwdVec *600.0f) + Start);
+	FVector End = ((FrwdVec *1000.0f) + Start);
 	
 	FCollisionQueryParams CollisionParams;
 
@@ -285,11 +285,17 @@ void AFEZ2DCharacter::DepthCorrection()
 		if (OutHit.bBlockingHit)
 		{
 			if (GEngine) {
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.GetActor()->GetActorLocation().ToCompactString()));
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
+				
+				
 			}
 		}
 	}
+}
 
 
-
+void AFEZ2DCharacter::SetNewPositionDepth(FVector impactPoint) 
+{
+	
 }

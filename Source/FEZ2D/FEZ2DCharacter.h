@@ -81,6 +81,9 @@ protected:
 	void FallStop();
 
 	void DepthCorrection();
+	void SetNewPositionDepth(FVector impactPoint);
+
+
 
 
 
