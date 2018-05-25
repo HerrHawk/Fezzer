@@ -279,12 +279,15 @@ void AFEZ2DCharacter::DepthCorrection()
 	FCollisionQueryParams CollisionParams;
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
+	
 
 	if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
 	{
 		if (OutHit.bBlockingHit)
 		{
 			if (GEngine) {
+				SetNewPositionDepth(OutHit.ImpactPoint, FrwdVec);
+				DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false, 1, 0);
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
 				
@@ -295,7 +298,14 @@ void AFEZ2DCharacter::DepthCorrection()
 }
 
 
-void AFEZ2DCharacter::SetNewPositionDepth(FVector impactPoint) 
+void AFEZ2DCharacter::SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec) 
 {
+	FVector location = GetActorLocation();
+	if (FrwdVec.X != 0) {
+		GetCapsuleComponent()->SetWorldLocation(FVector(impactPoint.X, location.Y, location.Z), false);
+	}
+	else if (FrwdVec.Y != 0) {
+		GetCapsuleComponent()->SetWorldLocation(FVector(location.X, impactPoint.Y, location.Z), false);
+	}
 	
 }
