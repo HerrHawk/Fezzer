@@ -165,11 +165,6 @@ void AFEZ2DCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFEZ2DCharacter::MoveRight);
 
-	/*PlayerInputComponent->BindTouch(IE_Pressed, this, &AFEZ2DCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AFEZ2DCharacter::TouchStopped);*/
-
-
-
 	PlayerInputComponent->BindAction("CameraRight", IE_Pressed, this, &AFEZ2DCharacter::CameraRight);
 	PlayerInputComponent->BindAction("CameraRight", IE_Released, this, &AFEZ2DCharacter::CameraRightStop);
 
@@ -183,13 +178,14 @@ void AFEZ2DCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 void AFEZ2DCharacter::MoveRight(float Value)
 {
-	/*UpdateChar();*/
-	// Apply the input to the character motion
+	
+	if (Value<-0.01 || Value>0.01) {
+		DepthCorrection();
+	}
+	
 	FVector vec = CameraBoom->GetForwardVector();
-	//AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 	vec = vec.RotateAngleAxis(90.f, FVector(0, 0, 1));
-	//GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, vec.ToString());
-	//AddMovementInput(vec, Value);
+	
 	AddMovementInput(GetCapsuleComponent()->GetForwardVector(), Value);
 	
 	FRotator SpriteRotation = GetCapsuleComponent()->GetComponentRotation();
@@ -205,79 +201,20 @@ void AFEZ2DCharacter::MoveRight(float Value)
 
 }
 
-//void AFEZ2DCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
-//{
-//	// Jump on any touch
-//	Jump();
-//}
-//
-//void AFEZ2DCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
-//{
-//	// Cease jumping once touch stopped
-//	StopJumping();
-//}
+
 
 void AFEZ2DCharacter::UpdateCharacter()
 {
-	
-	
 
-	// Update animation to match the motion
 	UpdateAnimation();
 	
-	// Now setup the rotation of the controller based on the direction we are travelling
-	//const FVector PlayerVelocity = GetVelocity();	
-	//float TravelDirection = PlayerVelocity.X;
 
-
-	// Set the rotation so that the character faces his direction of travel.
-	DepthCorrection();
-	//FRotator PlayerRotation = GetActorRotation();
-	//if (Controller != nullptr)
-	//{
-	//	FRotator SpriteRotation = GetCapsuleComponent()->GetComponentRotation();
-	//	if (PlayerVelocity.X < 0.0f || PlayerVelocity.Y > 0.f)
-	//	{
-	//		SpriteRotation.Yaw = SpriteRotation.Yaw - 180.f;
-	//		GetSprite()->SetWorldRotation(SpriteRotation);
-
-	//		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("ForwardVector: %s Sprite: %s"), *GetCapsuleComponent()->GetForwardVector().ToString(), *GetSprite()->GetComponentRotation().ToString()));
-
-	//		//CameraRotation.Yaw = CameraRotation.Yaw - 90.0f;
-	//		//Controller->SetControlRotation(CameraRotation);
-	//		//Controller->SetControlRotation(FRotator(0.0, 180.0f, 0.0f));
-	//	}
-	//	else if (PlayerVelocity.X > 0.0f || PlayerVelocity.Y < 0.f)
-	//	{
-	//		GetSprite()->SetWorldRotation(SpriteRotation);
-
-	//		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Velocity: %s Sprite: %s"), *GetVelocity().ToString(), *GetSprite()->GetComponentRotation().ToString()));
-
-	//		//CameraRotation.Yaw = CameraRotation.Yaw + 90.0f;
-	//		//Controller->SetControlRotation(CameraRotation);
-	//		//Controller->SetControlRotation(FRotator(0.0f, 0.0f, 0.0f));
-	//	}
-	//	else 
-	//	{
-	//		//GetCapsuleComponent()->SetWorldRotation(CameraBoom->GetTargetRotation() + FRotator(0.f, 90.f, 0.f));
-	//	}
-	//	
-	//}
 }
 
 
 void AFEZ2DCharacter::CameraRight()
 {
 	if (bCanCameraRotate) {		
-		//FRotator NewCameraRotation = CameraBoom->RelativeRotation;
-		//NewCameraRotation.Yaw = NewCameraRotation.Yaw + -90.f;
-		//CameraBoom->RelativeRotation = NewCameraRotation;
-		//FRotator NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
-		//NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw - 90.f;
-
-		//Controller->SetControlRotation(NewCapsuleRotation);
-
-		//Controller->SetControlRotation(CameraBoom->GetTargetRotation());
 
 		
 		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
@@ -295,17 +232,6 @@ void AFEZ2DCharacter::CameraRight()
 void AFEZ2DCharacter::CameraLeft()
 {
 	if (bCanCameraRotate) {
-		//FRotator NewCameraRotation = CameraBoom->RelativeRotation;
-		//NewCameraRotation.Yaw = NewCameraRotation.Yaw + +90.f;
-		//CameraBoom->RelativeRotation = NewCameraRotation;
-
-		//FRotator NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
-		//NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
-
-		//Controller->SetControlRotation(NewCapsuleRotation);
-
-		//Controller->SetControlRotation(CameraBoom->GetTargetRotation());
-		//GetCapsuleComponent()->SetWorldRotation(CameraBoom->GetTargetRotation() - FRotator(0.f, 60.f, 0.f));
 
 		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
 		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
@@ -322,13 +248,13 @@ void AFEZ2DCharacter::CameraLeft()
 void AFEZ2DCharacter::CameraRightStop()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRightStop"));
-	//bCanCameraRotate = true;
+
 }
 
 void AFEZ2DCharacter::CameraLeftStop()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeftStop"));
-	//bCanCameraRotate = true;
+	
 }
 
 void AFEZ2DCharacter::Fall()
