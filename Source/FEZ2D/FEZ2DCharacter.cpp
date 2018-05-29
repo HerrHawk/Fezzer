@@ -57,7 +57,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 
 
 	CameraBoom->bUsePawnControlRotation = true;
-	SideViewCameraComponent->SetRelativeLocationAndRotation(FVector(0.f, 5000.f, 0.f), FRotator(0.f, -90.f, 0.f));
+	SideViewCameraComponent->SetRelativeLocationAndRotation(FVector(0.f, 4000.f, 0.f), FRotator(0.f, -90.f, 0.f));
 
 
 	// Configure character movement
@@ -164,8 +164,8 @@ void AFEZ2DCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFEZ2DCharacter::MoveRight);
 
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &AFEZ2DCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &AFEZ2DCharacter::TouchStopped);
+	/*PlayerInputComponent->BindTouch(IE_Pressed, this, &AFEZ2DCharacter::TouchStarted);
+	PlayerInputComponent->BindTouch(IE_Released, this, &AFEZ2DCharacter::TouchStopped);*/
 
 
 
@@ -204,17 +204,17 @@ void AFEZ2DCharacter::MoveRight(float Value)
 
 }
 
-void AFEZ2DCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Jump on any touch
-	Jump();
-}
-
-void AFEZ2DCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	// Cease jumping once touch stopped
-	StopJumping();
-}
+//void AFEZ2DCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
+//{
+//	// Jump on any touch
+//	Jump();
+//}
+//
+//void AFEZ2DCharacter::TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location)
+//{
+//	// Cease jumping once touch stopped
+//	StopJumping();
+//}
 
 void AFEZ2DCharacter::UpdateCharacter()
 {
@@ -356,7 +356,7 @@ void AFEZ2DCharacter::DepthCorrection()
 
 	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-120);
 	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
-	FVector End = ((FrwdVec *6000.0f) + Start);
+	FVector End = ((FrwdVec *7000.0f) + Start);
 	
 	FCollisionObjectQueryParams CollisionParams(ECC_TO_BITFIELD(ECC_WorldStatic));
 
