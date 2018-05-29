@@ -137,7 +137,7 @@ void AFEZ2DCharacter::Tick(float DeltaSeconds)
 
 
 		float RotationDifference = NewCapsuleRotation.Yaw - GetCapsuleComponent()->GetComponentRotation().Yaw;
-		if (RotationDifference >= -0.1f && RotationDifference <= 0.1f || RotationDifference >= -359.9f && RotationDifference <= -360.1f)
+		if (RotationDifference >= -0.1f && RotationDifference <= 0.1f || RotationDifference <= -359.9f && RotationDifference >= -360.1f)
 		{
 			bCanCameraRotate = true;
 			NewCapsuleRotation.Yaw = roundf(NewCapsuleRotation.Yaw);
