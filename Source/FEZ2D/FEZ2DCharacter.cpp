@@ -46,7 +46,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	// Create an orthographic camera (no perspective) and attach it to the boom
 	SideViewCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("SideViewCamera"));
 	SideViewCameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
-	SideViewCameraComponent->OrthoWidth = 2048.0f;
+	SideViewCameraComponent->OrthoWidth = 4096.0f;
 	SideViewCameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	// Prevent all automatic rotation behavior on the camera, character, and camera component
@@ -90,6 +90,8 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	// Enable replication on the Sprite component so animations show up when networked
 	GetSprite()->SetIsReplicated(true);
 	bReplicates = true;
+
+	CameraRotationSpeed = 0.05f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,6 +128,25 @@ void AFEZ2DCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	
 	UpdateCharacter();	
+
+	if (!bCanCameraRotate)
+	{
+
+		Controller->SetControlRotation(FMath::Lerp(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed));
+		GetCapsuleComponent()->RelativeLocation = FreezLocation;
+
+
+		float RotationDifference = NewCapsuleRotation.Yaw - GetCapsuleComponent()->GetComponentRotation().Yaw;
+		if (RotationDifference >= -0.1f && RotationDifference <= 0.1f)
+		{
+			bCanCameraRotate = true;
+			NewCapsuleRotation.Yaw = roundf(NewCapsuleRotation.Yaw);
+			Controller->SetControlRotation(NewCapsuleRotation);
+			GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Finished Roting")));
+		}
+
+	}
+
 }
 
 
@@ -246,15 +267,21 @@ void AFEZ2DCharacter::CameraRight()
 		//FRotator NewCameraRotation = CameraBoom->RelativeRotation;
 		//NewCameraRotation.Yaw = NewCameraRotation.Yaw + -90.f;
 		//CameraBoom->RelativeRotation = NewCameraRotation;
-		FRotator NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
-		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw - 90.f;
+		//FRotator NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
+		//NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw - 90.f;
 
-		Controller->SetControlRotation(NewCapsuleRotation);
+		//Controller->SetControlRotation(NewCapsuleRotation);
 
 		//Controller->SetControlRotation(CameraBoom->GetTargetRotation());
 
+		
+		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
+		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + -90.f;
+
+		FreezLocation = GetCapsuleComponent()->RelativeLocation;
+
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRight"));
-		MoveRight(1.f);
+		
 	}
 	bCanCameraRotate = false;
 }
@@ -266,16 +293,21 @@ void AFEZ2DCharacter::CameraLeft()
 		//NewCameraRotation.Yaw = NewCameraRotation.Yaw + +90.f;
 		//CameraBoom->RelativeRotation = NewCameraRotation;
 
-		FRotator NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
-		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
+		//FRotator NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
+		//NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
 
-		Controller->SetControlRotation(NewCapsuleRotation);
+		//Controller->SetControlRotation(NewCapsuleRotation);
 
 		//Controller->SetControlRotation(CameraBoom->GetTargetRotation());
 		//GetCapsuleComponent()->SetWorldRotation(CameraBoom->GetTargetRotation() - FRotator(0.f, 60.f, 0.f));
 
+		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
+		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
+
+		FreezLocation = GetCapsuleComponent()->RelativeLocation;
+
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeft"));
-		MoveRight(1.f);
+		
 	}
 	bCanCameraRotate = false;
 }
@@ -283,13 +315,13 @@ void AFEZ2DCharacter::CameraLeft()
 void AFEZ2DCharacter::CameraRightStop()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRightStop"));
-	bCanCameraRotate = true;
+	//bCanCameraRotate = true;
 }
 
 void AFEZ2DCharacter::CameraLeftStop()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeftStop"));
-	bCanCameraRotate = true;
+	//bCanCameraRotate = true;
 }
 
 void AFEZ2DCharacter::Fall()
@@ -311,6 +343,11 @@ void AFEZ2DCharacter::FallStop()
 
 void AFEZ2DCharacter::DepthCorrection()
 {
+	if (!bCanCameraRotate)
+	{
+		return;
+	}
+
 	FHitResult OutHit;
 
 	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-120);
@@ -319,7 +356,7 @@ void AFEZ2DCharacter::DepthCorrection()
 	
 	FCollisionObjectQueryParams CollisionParams(ECC_TO_BITFIELD(ECC_WorldStatic));
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
 	
 
 	if (GetWorld()->LineTraceSingleByObjectType(OutHit, Start, End, CollisionParams))
@@ -328,9 +365,9 @@ void AFEZ2DCharacter::DepthCorrection()
 		{
 			if (GEngine) {
 				SetNewPositionDepth(OutHit.ImpactPoint, FrwdVec);
-				DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false,1,0);
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
+				//DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false,1,0);
+				//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
+				//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
 				
 				
 			}

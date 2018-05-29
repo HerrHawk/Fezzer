@@ -83,8 +83,9 @@ protected:
 	void DepthCorrection();
 	void SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec);
 
-
-
+	float CameraRotationSpeed;
+	FRotator NewCapsuleRotation;
+	FVector FreezLocation;
 
 	void UpdateCharacter();
 
