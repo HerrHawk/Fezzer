@@ -313,22 +313,22 @@ void AFEZ2DCharacter::DepthCorrection()
 {
 	FHitResult OutHit;
 
-	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-100);
+	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-120);
 	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
-	FVector End = ((FrwdVec *5000.0f) + Start);
+	FVector End = ((FrwdVec *6000.0f) + Start);
 	
-	FCollisionQueryParams CollisionParams;
+	FCollisionObjectQueryParams CollisionParams(ECC_TO_BITFIELD(ECC_WorldStatic));
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
 	
 
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, CollisionParams))
+	if (GetWorld()->LineTraceSingleByObjectType(OutHit, Start, End, CollisionParams))
 	{
 		if (OutHit.bBlockingHit)
 		{
 			if (GEngine) {
 				SetNewPositionDepth(OutHit.ImpactPoint, FrwdVec);
-				DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false, 1, 0);
+				DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false,1,0);
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
 				
@@ -342,10 +342,10 @@ void AFEZ2DCharacter::DepthCorrection()
 void AFEZ2DCharacter::SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec) 
 {
 	FVector location = GetActorLocation();
-	if (FrwdVec.X != 0) {
+	if (FrwdVec.X > 0.1  || FrwdVec.X < -0.1) {
 		GetCapsuleComponent()->SetWorldLocation(FVector(impactPoint.X, location.Y, location.Z), false);
 	}
-	else if (FrwdVec.Y != 0) {
+	else if (FrwdVec.Y > 0.1 || FrwdVec.Y < -0.1) {
 		GetCapsuleComponent()->SetWorldLocation(FVector(location.X, impactPoint.Y, location.Z), false);
 	}
 	
