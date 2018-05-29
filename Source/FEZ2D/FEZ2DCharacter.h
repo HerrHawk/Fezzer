@@ -85,7 +85,8 @@ protected:
 
 	float CameraRotationSpeed;
 	FRotator NewCapsuleRotation;
-	FVector FreezLocation;
+	FVector FreezeLocation;
+	FVector FreezeVelocity;
 
 	void UpdateCharacter();
 

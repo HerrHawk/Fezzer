@@ -127,14 +127,15 @@ void AFEZ2DCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	UpdateCharacter();	
-
-	if (!bCanCameraRotate)
+	if (bCanCameraRotate) {
+		UpdateCharacter();
+	} 
+	else
 	{
-
 		Controller->SetControlRotation(FMath::Lerp(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed));
-		GetCapsuleComponent()->RelativeLocation = FreezLocation;
-
+		
+		GetCapsuleComponent()->SetWorldLocation(FreezeLocation);
+		GetCharacterMovement()->Velocity = FreezeVelocity;
 
 		float RotationDifference = NewCapsuleRotation.Yaw - GetCapsuleComponent()->GetComponentRotation().Yaw;
 		if (RotationDifference >= -0.1f && RotationDifference <= 0.1f || RotationDifference <= -359.9f && RotationDifference >= -360.1f)
@@ -146,7 +147,7 @@ void AFEZ2DCharacter::Tick(float DeltaSeconds)
 		}
 		else
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Difference %f"), RotationDifference));
+			//GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Difference %f"), RotationDifference));
 		}
 
 	}
@@ -282,7 +283,8 @@ void AFEZ2DCharacter::CameraRight()
 		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
 		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + -90.f;
 
-		FreezLocation = GetCapsuleComponent()->RelativeLocation;
+		FreezeLocation = GetCapsuleComponent()->GetComponentLocation();
+		FreezeVelocity = GetCapsuleComponent()->ComponentVelocity;
 
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRight"));
 		
@@ -308,7 +310,8 @@ void AFEZ2DCharacter::CameraLeft()
 		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
 		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
 
-		FreezLocation = GetCapsuleComponent()->RelativeLocation;
+		FreezeLocation = GetCapsuleComponent()->GetComponentLocation();
+		FreezeVelocity = GetCapsuleComponent()->ComponentVelocity;
 
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeft"));
 		
@@ -347,10 +350,7 @@ void AFEZ2DCharacter::FallStop()
 
 void AFEZ2DCharacter::DepthCorrection()
 {
-	if (!bCanCameraRotate)
-	{
-		return;
-	}
+	
 
 	FHitResult OutHit;
 
