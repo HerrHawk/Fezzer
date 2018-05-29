@@ -202,7 +202,6 @@ void AFEZ2DCharacter::MoveRight(float Value)
 }
 
 
-
 void AFEZ2DCharacter::UpdateCharacter()
 {
 
@@ -308,12 +307,20 @@ void AFEZ2DCharacter::DepthCorrection()
 
 void AFEZ2DCharacter::SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec) 
 {
+	float axis_offset = 70.0;
+
 	FVector location = GetActorLocation();
-	if (FrwdVec.X > 0.1  || FrwdVec.X < -0.1) {
-		GetCapsuleComponent()->SetWorldLocation(FVector(impactPoint.X, location.Y, location.Z), false);
+	if (FrwdVec.X > 0.1) {
+		GetCapsuleComponent()->SetWorldLocation(FVector(impactPoint.X+axis_offset, location.Y, location.Z), false);
 	}
-	else if (FrwdVec.Y > 0.1 || FrwdVec.Y < -0.1) {
-		GetCapsuleComponent()->SetWorldLocation(FVector(location.X, impactPoint.Y, location.Z), false);
+	else if (FrwdVec.X < -0.1) {
+		GetCapsuleComponent()->SetWorldLocation(FVector(impactPoint.X-axis_offset, location.Y, location.Z), false);
+	}
+	else if (FrwdVec.Y > 0.1) {
+		GetCapsuleComponent()->SetWorldLocation(FVector(location.X, impactPoint.Y+axis_offset, location.Z), false);
+	}
+	else if (FrwdVec.Y < -0.1) {
+		GetCapsuleComponent()->SetWorldLocation(FVector(location.X, impactPoint.Y-axis_offset, location.Z), false);
 	}
 	
 }
