@@ -62,7 +62,7 @@ protected:
 	void MoveRight(float Value);
 
 	void Jump();
-	
+	void Falling();
 
 	bool checkIfCharIsFalling();
 

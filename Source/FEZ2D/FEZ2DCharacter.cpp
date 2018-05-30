@@ -183,8 +183,9 @@ void AFEZ2DCharacter::UpdateCharacter()
 {
 	if (checkIfCharIsFalling()) {
 		DepthCorrection();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		
 	}
-
 	UpdateAnimation();
 	
 
@@ -270,6 +271,9 @@ void AFEZ2DCharacter::Jump() {
 
 	ACharacter::Jump();
 }
+void AFEZ2DCharacter::Falling() {
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
 
 
 void AFEZ2DCharacter::Fall()
@@ -295,13 +299,13 @@ void AFEZ2DCharacter::DepthCorrection()
 
 	FHitResult OutHit;
 
-	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-120);
+	FVector Start = SideViewCameraComponent->GetComponentLocation()+FVector(0.0,0.0,-60);
 	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
 	FVector End = ((FrwdVec *7000.0f) + Start);
 	
 	FCollisionObjectQueryParams CollisionParams(ECC_TO_BITFIELD(ECC_GameTraceChannel1)); //FZ_Platform
 
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
 	
 
 	if (GetWorld()->LineTraceSingleByObjectType(OutHit, Start, End, CollisionParams))
@@ -310,9 +314,9 @@ void AFEZ2DCharacter::DepthCorrection()
 		{
 			if (GEngine) {
 				SetNewPositionDepth(OutHit.ImpactPoint, FrwdVec);
-				//DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false,1,0);
-				//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
-				//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
+				DrawDebugPoint(GetWorld(), OutHit.ImpactPoint, 50, FColor::Red, false,1,0);
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, FString::Printf(TEXT("You are hitting: %s Location: %s"), *OutHit.GetActor()->GetName(), *OutHit.ImpactPoint.ToCompactString()));
+				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("ForwardVector: %s "), *FrwdVec.ToCompactString()));
 				
 				
 			}
