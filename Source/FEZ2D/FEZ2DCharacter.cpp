@@ -63,7 +63,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	// Configure character movement
 	GetCharacterMovement()->GravityScale = 2.0f;
 	GetCharacterMovement()->AirControl = 0.80f;
-	GetCharacterMovement()->JumpZVelocity = 1000.f;
+	GetCharacterMovement()->JumpZVelocity = 1100.f;
 	GetCharacterMovement()->GroundFriction = 3.0f;
 	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 	GetCharacterMovement()->MaxFlySpeed = 600.0f;
@@ -178,7 +178,7 @@ void AFEZ2DCharacter::UpdateCharacter()
 {
 	if (checkIfCharIsFalling()) {
 		DepthCorrection();
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		
 	}
 	UpdateAnimation();
@@ -261,19 +261,11 @@ void AFEZ2DCharacter::Jump() {
 	ACharacter::Jump();
 }
 void AFEZ2DCharacter::Falling() {
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 
-void AFEZ2DCharacter::Fall()
-{
-	if (bCanFall) {
-		FVector ActorLocation = GetActorLocation();
-		ActorLocation.Z -= 10.f;
-		SetActorLocation(ActorLocation);
-	}
-	bCanFall = false;
-}
+
 
 void AFEZ2DCharacter::DepthCorrection()
 {
@@ -309,7 +301,7 @@ void AFEZ2DCharacter::DepthCorrection()
 
 void AFEZ2DCharacter::SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec) 
 {
-	float axis_offset = 70.0;
+	float axis_offset = 70;
 
 	FVector location = GetActorLocation();
 	if (FrwdVec.X > 0.1) {
