@@ -6,6 +6,7 @@
 #include "PaperCharacter.h"
 #include "FEZ2DCharacter.generated.h"
 
+
 class UTextRenderComponent;
 
 /**
@@ -32,6 +33,7 @@ class AFEZ2DCharacter : public APaperCharacter
 
 	UTextRenderComponent* TextComponent;
 	virtual void Tick(float DeltaSeconds) override;
+
 protected:
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
@@ -62,39 +64,54 @@ protected:
 	
 
 
-
-
+	UPROPERTY()
 	bool bCanCameraRotate = true;
 
+	UFUNCTION()
 	void CameraRight();
 
+	UFUNCTION()
 	void CameraLeft();
 
+	UFUNCTION()
 	void CameraRightStop();
 
+	UFUNCTION()
 	void CameraLeftStop();
 
+	UFUNCTION()
+	void CameraRotation(float DeltaSeconds);
+
+	UPROPERTY()
 	bool bCanFall = true;
 
+	UFUNCTION()
 	void Fall();
 
+	UFUNCTION()
 	void FallStop();
 
+	UFUNCTION()
 	void DepthCorrection();
+	
+	UFUNCTION()
 	void SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec);
 
+	UPROPERTY()
 	float CameraRotationSpeed;
+	
+	UPROPERTY()
 	FRotator NewCapsuleRotation;
+	
+	UPROPERTY()
 	FVector FreezeLocation;
+	
+	UPROPERTY()
 	FVector FreezeVelocity;
 
+	UFUNCTION()
 	void UpdateCharacter();
 
-	/** Handle touch inputs. */
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
-
-	/** Handle touch stop event. */
-	void TouchStopped(const ETouchIndex::Type FingerIndex, const FVector Location);
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;

@@ -91,7 +91,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	GetSprite()->SetIsReplicated(true);
 	bReplicates = true;
 
-	CameraRotationSpeed = 0.05f;
+	CameraRotationSpeed = 5.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,30 +126,15 @@ void AFEZ2DCharacter::UpdateAnimation()
 void AFEZ2DCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
 	
 	if (bCanCameraRotate) {
 		UpdateCharacter();
 	} 
 	else
 	{
-		Controller->SetControlRotation(FMath::Lerp(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed));
-		
-		GetCapsuleComponent()->SetWorldLocation(FreezeLocation);
-		GetCharacterMovement()->Velocity = FreezeVelocity;
-
-		float RotationDifference = NewCapsuleRotation.Yaw - GetCapsuleComponent()->GetComponentRotation().Yaw;
-		if (RotationDifference >= -0.1f && RotationDifference <= 0.1f || RotationDifference <= -359.9f && RotationDifference >= -360.1f)
-		{
-			bCanCameraRotate = true;
-			NewCapsuleRotation.Yaw = roundf(NewCapsuleRotation.Yaw);
-			Controller->SetControlRotation(NewCapsuleRotation);
-			GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Finished Roting")));
-		}
-		else
-		{
-			//GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Difference %f"), RotationDifference));
-		}
-
+		CameraRotation(DeltaSeconds);
+		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Delta Seconds %f"), DeltaSeconds));
 	}
 
 }
@@ -221,6 +206,9 @@ void AFEZ2DCharacter::CameraRight()
 
 		FreezeLocation = GetCapsuleComponent()->GetComponentLocation();
 		FreezeVelocity = GetCapsuleComponent()->ComponentVelocity;
+		FreezeVelocity = FreezeVelocity.RotateAngleAxis(-90.f, FVector(0.f, 0.f, 1.f));
+		GetSprite()->Stop();
+
 
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRight"));
 		
@@ -237,6 +225,8 @@ void AFEZ2DCharacter::CameraLeft()
 
 		FreezeLocation = GetCapsuleComponent()->GetComponentLocation();
 		FreezeVelocity = GetCapsuleComponent()->ComponentVelocity;
+		FreezeVelocity = FreezeVelocity.RotateAngleAxis(90.f, FVector(0.f, 0.f, 1.f));
+		GetSprite()->Stop();
 
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeft"));
 		
@@ -254,6 +244,31 @@ void AFEZ2DCharacter::CameraLeftStop()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeftStop"));
 	
+}
+
+void AFEZ2DCharacter::CameraRotation(float DeltaSeconds)
+{
+	Controller->SetControlRotation(FMath::Lerp(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, DeltaSeconds/(1.f/CameraRotationSpeed)));
+	//Controller->SetControlRotation(FMath::InterpEaseInOut(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed, 1.f));
+	//Controller->SetControlRotation(FMath::InterpExpoInOut(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed));
+
+
+	GetCapsuleComponent()->SetWorldLocation(FreezeLocation);
+	GetCharacterMovement()->Velocity = FreezeVelocity;
+
+	float RotationDifference = NewCapsuleRotation.Yaw - GetCapsuleComponent()->GetComponentRotation().Yaw;
+	if (RotationDifference >= -0.1f && RotationDifference <= 0.1f || RotationDifference <= -359.9f && RotationDifference >= -360.1f)
+	{
+		bCanCameraRotate = true;
+		NewCapsuleRotation.Yaw = roundf(NewCapsuleRotation.Yaw);
+		Controller->SetControlRotation(NewCapsuleRotation);
+		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Finished Roting")));
+		GetSprite()->Play();
+	}
+	else
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Difference %f"), RotationDifference));
+	}
 }
 
 void AFEZ2DCharacter::Fall()
