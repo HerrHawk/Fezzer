@@ -271,6 +271,12 @@ void AFEZ2DCharacter::CameraRotation(float DeltaSeconds)
 	}
 }
 
+void AFEZ2DCharacter::Falling() {
+	ACharacter::Falling();
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("I don't feel so good")));
+	//DepthCorrection();
+}
+
 void AFEZ2DCharacter::Fall()
 {
 	if (bCanFall) {
@@ -298,7 +304,7 @@ void AFEZ2DCharacter::DepthCorrection()
 	FVector FrwdVec =  SideViewCameraComponent->GetForwardVector();
 	FVector End = ((FrwdVec *7000.0f) + Start);
 	
-	FCollisionObjectQueryParams CollisionParams(ECC_TO_BITFIELD(ECC_WorldStatic));
+	FCollisionObjectQueryParams CollisionParams(ECC_TO_BITFIELD(ECC_GameTraceChannel1)); //FZ_Platform
 
 	//DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, 1, 0, 1);
 	
