@@ -91,7 +91,7 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	GetSprite()->SetIsReplicated(true);
 	bReplicates = true;
 
-	CameraRotationSpeed = 5.f;
+	CameraRotationSpeed = 90.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ void AFEZ2DCharacter::Tick(float DeltaSeconds)
 	else
 	{
 		CameraRotation(DeltaSeconds);
-		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Delta Seconds %f"), DeltaSeconds));
+		//GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Delta Seconds %f"), DeltaSeconds));
 	}
 
 }
@@ -151,13 +151,8 @@ void AFEZ2DCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFEZ2DCharacter::MoveRight);
 
 	PlayerInputComponent->BindAction("CameraRight", IE_Pressed, this, &AFEZ2DCharacter::CameraRight);
-	PlayerInputComponent->BindAction("CameraRight", IE_Released, this, &AFEZ2DCharacter::CameraRightStop);
 
 	PlayerInputComponent->BindAction("CameraLeft", IE_Pressed, this, &AFEZ2DCharacter::CameraLeft);
-	PlayerInputComponent->BindAction("CameraLeft", IE_Released, this, &AFEZ2DCharacter::CameraLeftStop);
-
-	PlayerInputComponent->BindAction("Fall", IE_Pressed, this, &AFEZ2DCharacter::Fall);
-	PlayerInputComponent->BindAction("Fall", IE_Released, this, &AFEZ2DCharacter::FallStop);
 
 }
 
@@ -203,14 +198,17 @@ void AFEZ2DCharacter::CameraRight()
 		
 		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
 		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + -90.f;
+		CapsuleRotationDifference = NewCapsuleRotation - GetCapsuleComponent()->GetComponentRotation();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("new %s"), *NewCapsuleRotation.ToString()));
 
 		FreezeLocation = GetCapsuleComponent()->GetComponentLocation();
-		FreezeVelocity = GetCapsuleComponent()->ComponentVelocity;
+		FreezeVelocity = GetCharacterMovement()->Velocity;
 		FreezeVelocity = FreezeVelocity.RotateAngleAxis(-90.f, FVector(0.f, 0.f, 1.f));
 		GetSprite()->Stop();
 
 
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRight"));
+		starttime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 		
 	}
 	bCanCameraRotate = false;
@@ -222,9 +220,11 @@ void AFEZ2DCharacter::CameraLeft()
 
 		NewCapsuleRotation = GetCapsuleComponent()->GetComponentRotation();
 		NewCapsuleRotation.Yaw = NewCapsuleRotation.Yaw + 90.f;
+		CapsuleRotationDifference = NewCapsuleRotation - GetCapsuleComponent()->GetComponentRotation();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("new %s"), *NewCapsuleRotation.ToString()));
 
 		FreezeLocation = GetCapsuleComponent()->GetComponentLocation();
-		FreezeVelocity = GetCapsuleComponent()->ComponentVelocity;
+		FreezeVelocity = GetCharacterMovement()->Velocity;
 		FreezeVelocity = FreezeVelocity.RotateAngleAxis(90.f, FVector(0.f, 0.f, 1.f));
 		GetSprite()->Stop();
 
@@ -234,36 +234,25 @@ void AFEZ2DCharacter::CameraLeft()
 	bCanCameraRotate = false;
 }
 
-void AFEZ2DCharacter::CameraRightStop()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraRightStop"));
 
-}
-
-void AFEZ2DCharacter::CameraLeftStop()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("CameraLeftStop"));
-	
-}
 
 void AFEZ2DCharacter::CameraRotation(float DeltaSeconds)
 {
-	Controller->SetControlRotation(FMath::Lerp(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, DeltaSeconds/(1.f/CameraRotationSpeed)));
-	//Controller->SetControlRotation(FMath::InterpEaseInOut(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed, 1.f));
-	//Controller->SetControlRotation(FMath::InterpExpoInOut(GetCapsuleComponent()->GetComponentRotation(), NewCapsuleRotation, CameraRotationSpeed));
-
+	Controller->SetControlRotation(GetCapsuleComponent()->GetComponentRotation() + (CapsuleRotationDifference * ((CameraRotationSpeed * DeltaSeconds)/90.f)));
 
 	GetCapsuleComponent()->SetWorldLocation(FreezeLocation);
 	GetCharacterMovement()->Velocity = FreezeVelocity;
 
 	float RotationDifference = NewCapsuleRotation.Yaw - GetCapsuleComponent()->GetComponentRotation().Yaw;
-	if (RotationDifference >= -0.1f && RotationDifference <= 0.1f || RotationDifference <= -359.9f && RotationDifference >= -360.1f)
+	if (RotationDifference >= -0.5f && RotationDifference <= 0.5f || RotationDifference <= -359.5f && RotationDifference >= -360.5f)
 	{
 		bCanCameraRotate = true;
 		NewCapsuleRotation.Yaw = roundf(NewCapsuleRotation.Yaw);
 		Controller->SetControlRotation(NewCapsuleRotation);
 		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("Finished Roting")));
 		GetSprite()->Play();
+		endtime = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+		GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, FString::Printf(TEXT("time %f"), endtime-starttime));
 	}
 	else
 	{
@@ -275,22 +264,6 @@ void AFEZ2DCharacter::Falling() {
 	ACharacter::Falling();
 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("I don't feel so good")));
 	//DepthCorrection();
-}
-
-void AFEZ2DCharacter::Fall()
-{
-	if (bCanFall) {
-		FVector ActorLocation = GetActorLocation();
-		ActorLocation.Z -= 10.f;
-		SetActorLocation(ActorLocation);
-	}
-	bCanFall = false;
-}
-
-void AFEZ2DCharacter::FallStop()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Red, TEXT("Fall"));
-	bCanFall = true;
 }
 
 

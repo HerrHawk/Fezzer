@@ -65,43 +65,37 @@ protected:
 
 	
 
-
+	/** Is set to false when the camera rotates, so the rotate buttons can't be spammed. Is set to true when the rotaion finishes. */
 	UPROPERTY()
 	bool bCanCameraRotate = true;
 
+	/** If bCanCameraRotate is allowd, starts rotating the capsule component to the right, therefore it looks like the camera rotates to the right. Also freezes the location, velocity and sprite animation. */
 	UFUNCTION()
 	void CameraRight();
 
+	/** If bCanCameraRotate is allowd, starts rotating the capsule component to the left, therefore it looks like the camera rotates to the left. Also freezes the location, velocity and sprite animation. */
 	UFUNCTION()
 	void CameraLeft();
 
-	UFUNCTION()
-	void CameraRightStop();
-
-	UFUNCTION()
-	void CameraLeftStop();
-
+	/** Smoothly rotates the capsule component. If finished, sets bCanCameraRotate to true and unfreezes location, velocity and sprite animation. */
 	UFUNCTION()
 	void CameraRotation(float DeltaSeconds);
 
-	UPROPERTY()
-	bool bCanFall = true;
-
-	UFUNCTION()
-	void Fall();
-
-	UFUNCTION()
-	void FallStop();
-
+	/** Checks if the depth location of the character needs to be corrected. */
 	UFUNCTION()
 	void DepthCorrection();
 	
+	/** Corrects the depth location of the character. */
 	UFUNCTION()
 	void SetNewPositionDepth(FVector & impactPoint, FVector & FrwdVec);
 
+	/** */
 	UPROPERTY()
 	float CameraRotationSpeed;
 	
+	UPROPERTY()
+	FRotator CapsuleRotationDifference;
+
 	UPROPERTY()
 	FRotator NewCapsuleRotation;
 	
@@ -118,6 +112,12 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+
+	float starttime;
+	float endtime;
+
+
 
 public:
 	AFEZ2DCharacter();
