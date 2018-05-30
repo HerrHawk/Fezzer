@@ -78,14 +78,6 @@ AFEZ2DCharacter::AFEZ2DCharacter()
 	GetCharacterMovement()->bUseFlatBaseForFloorChecks = true;
 
 
-	//LineTrace for DepthCorrection;
-
-
-    // 	TextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("IncarGear"));
-    // 	TextComponent->SetRelativeScale3D(FVector(3.0f, 3.0f, 3.0f));
-    // 	TextComponent->SetRelativeLocation(FVector(35.0f, 5.0f, 20.0f));
-    // 	TextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
-    // 	TextComponent->SetupAttachment(RootComponent);
 
 	// Enable replication on the Sprite component so animations show up when networked
 	GetSprite()->SetIsReplicated(true);
@@ -184,6 +176,9 @@ void AFEZ2DCharacter::MoveRight(float Value)
 
 void AFEZ2DCharacter::UpdateCharacter()
 {
+	if (checkIfCharIsFalling()) {
+		DepthCorrection();
+	}
 
 	UpdateAnimation();
 	
@@ -260,12 +255,21 @@ void AFEZ2DCharacter::CameraRotation(float DeltaSeconds)
 	}
 }
 
-void AFEZ2DCharacter::Falling() {
-	ACharacter::Falling();
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("I don't feel so good")));
-	//DepthCorrection();
+void AFEZ2DCharacter::Jump() {
+
+	ACharacter::Jump();
 }
 
+
+void AFEZ2DCharacter::Fall()
+{
+	if (bCanFall) {
+		FVector ActorLocation = GetActorLocation();
+		ActorLocation.Z -= 10.f;
+		SetActorLocation(ActorLocation);
+	}
+	bCanFall = false;
+}
 
 void AFEZ2DCharacter::DepthCorrection()
 {
@@ -317,4 +321,12 @@ void AFEZ2DCharacter::SetNewPositionDepth(FVector & impactPoint, FVector & FrwdV
 		GetCapsuleComponent()->SetWorldLocation(FVector(location.X, impactPoint.Y-axis_offset, location.Z), false);
 	}
 	
+}
+
+
+bool AFEZ2DCharacter::checkIfCharIsFalling() {
+	if (GetCharacterMovement()->Velocity.Z <= -0.01)
+		return true;
+
+	return false;
 }
